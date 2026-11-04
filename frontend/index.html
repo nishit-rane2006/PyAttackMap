@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PyAttackMap – Security Analysis Dashboard</title>
-  <meta name="description" content="PyAttackMap is an explainable static security analysis and data-flow visualization tool for Python source code. Detect SQL injection, command injection, and unsafe deserialization vulnerabilities instantly." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <title>PyAttackMap - Python Security Scanner</title>
+  <meta name="description" content="Scan Python source code for common security issues and review the reported data-flow paths." />
+  <script>
+    const requestedPage = new URLSearchParams(window.location.search).get('page');
+    const page = ['scanner', 'rules', 'about'].includes(requestedPage) ? requestedPage : 'scanner';
+    document.documentElement.dataset.page = page;
+  </script>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -15,20 +17,12 @@
   <!-- ── TOP NAVBAR ── -->
   <header class="navbar" id="main-navbar">
     <div class="navbar-brand">
-      <div class="brand-icon">
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-          <polygon points="14,2 26,8 26,20 14,26 2,20 2,8" stroke="#00f5c4" stroke-width="1.5" fill="none"/>
-          <polygon points="14,7 21,11 21,17 14,21 7,17 7,11" stroke="#00f5c4" stroke-width="1" fill="rgba(0,245,196,0.08)"/>
-          <circle cx="14" cy="14" r="3" fill="#00f5c4"/>
-        </svg>
-      </div>
-      <span class="brand-name">PyAttack<span class="brand-accent">Map</span></span>
-      <span class="brand-badge">C++20 Engine</span>
+      <a href="?page=scanner" class="brand-name">PyAttack<span class="brand-accent">Map</span></a>
     </div>
     <nav class="navbar-links">
-      <a href="#scan-section" class="nav-link active" id="nav-scan">Scanner</a>
-      <a href="#rules-section" class="nav-link" id="nav-rules">Rules</a>
-      <a href="#about-section" class="nav-link" id="nav-about">About</a>
+      <a href="?page=scanner#scan-section" class="nav-link" id="nav-scan">Scanner</a>
+      <a href="?page=rules#rules-section" class="nav-link" id="nav-rules">Rules</a>
+      <a href="?page=about#about-section" class="nav-link" id="nav-about">About</a>
     </nav>
     <div class="navbar-actions">
       <div class="status-indicator" id="engine-status">
@@ -44,22 +38,14 @@
 
   <!-- ── HERO BANNER ── -->
   <section class="hero" id="hero-section">
-    <div class="hero-particles" id="particles-container"></div>
     <div class="hero-content">
-      <div class="hero-eyebrow">Static Security Analysis · 42x Faster than Python</div>
-      <h1 class="hero-title">Scan. Detect. <span class="gradient-text">Visualize.</span></h1>
+      <div class="hero-eyebrow">Python security scanner</div>
+      <h1 class="hero-title">Check your Python code for common security issues</h1>
       <p class="hero-subtitle">
-        Upload your Python code and get instant, explainable vulnerability reports with interactive data-flow attack graphs. Powered by a native C++20 engine with Tree-sitter parsing.
+        Paste code or upload a Python file to see possible security problems and how data flows through your code.
       </p>
-      <div class="hero-stats">
-        <div class="stat-chip"><span class="stat-value">42x</span><span class="stat-label">Faster</span></div>
-        <div class="stat-chip"><span class="stat-value">5,500+</span><span class="stat-label">Files/sec</span></div>
-        <div class="stat-chip"><span class="stat-value">3</span><span class="stat-label">CWE Rules</span></div>
-        <div class="stat-chip"><span class="stat-value">24</span><span class="stat-label">Tests Pass</span></div>
-      </div>
       <button class="btn-primary hero-cta" id="start-scan-hero-btn" onclick="document.getElementById('scan-section').scrollIntoView({behavior:'smooth'})">
         Start Scanning
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </button>
     </div>
   </section>
@@ -71,7 +57,7 @@
     <section id="scan-section" class="section">
       <div class="section-header">
         <h2 class="section-title">
-          <span class="title-icon">⚡</span> Code Scanner
+          Code Scanner
         </h2>
         <p class="section-subtitle">Paste Python code or upload a .py file to detect security vulnerabilities</p>
       </div>
@@ -152,28 +138,24 @@
           <!-- Summary Cards -->
           <div class="summary-cards" id="summary-cards" style="display:none;">
             <div class="summary-card card-total">
-              <div class="card-icon">📁</div>
               <div class="card-data">
                 <span class="card-value" id="total-findings">0</span>
                 <span class="card-label">Findings</span>
               </div>
             </div>
             <div class="summary-card card-high">
-              <div class="card-icon">🔴</div>
               <div class="card-data">
                 <span class="card-value" id="high-count">0</span>
                 <span class="card-label">Critical/High</span>
               </div>
             </div>
             <div class="summary-card card-medium">
-              <div class="card-icon">🟡</div>
               <div class="card-data">
                 <span class="card-value" id="medium-count">0</span>
                 <span class="card-label">Medium</span>
               </div>
             </div>
             <div class="summary-card card-speed">
-              <div class="card-icon">⚡</div>
               <div class="card-data">
                 <span class="card-value" id="scan-speed">0ms</span>
                 <span class="card-label">Scan Time</span>
@@ -226,7 +208,7 @@
       <!-- ── DATA FLOW VISUALIZATION ── -->
       <div class="panel dataflow-panel" id="dataflow-panel" style="display:none;">
         <div class="panel-header">
-          <span class="panel-title">🔗 Data-Flow Attack Graph</span>
+          <span class="panel-title">Data-Flow Graph</span>
           <div class="panel-actions">
             <select id="finding-select" class="config-select sm"></select>
             <button class="btn-icon" id="copy-mermaid-btn">Copy Mermaid</button>
@@ -245,7 +227,7 @@
     <!-- ── RULES SECTION ── -->
     <section id="rules-section" class="section">
       <div class="section-header">
-        <h2 class="section-title"><span class="title-icon">📋</span> Security Rules</h2>
+        <h2 class="section-title">Security Rules</h2>
         <p class="section-subtitle">Built-in detection rules powered by intra-procedural taint analysis</p>
       </div>
       <div class="rules-grid" id="rules-grid">
@@ -313,27 +295,23 @@
     <!-- ── ABOUT SECTION ── -->
     <section id="about-section" class="section">
       <div class="section-header">
-        <h2 class="section-title"><span class="title-icon">ℹ️</span> About PyAttackMap</h2>
+        <h2 class="section-title">About PyAttackMap</h2>
         <p class="section-subtitle">High-performance native security analysis for Python codebases</p>
       </div>
       <div class="about-grid">
         <div class="about-card">
-          <div class="about-icon">🚀</div>
           <h3>Native C++20 Engine</h3>
           <p>Zero Python interpreter runtime overhead. The analysis engine is compiled to native machine code achieving 42x speedup over the Python baseline.</p>
         </div>
         <div class="about-card">
-          <div class="about-icon">🌳</div>
           <h3>Tree-sitter Parsing</h3>
           <p>Uses the official Tree-sitter C runtime with Python grammar for robust, fast concrete syntax tree parsing without executing target code.</p>
         </div>
         <div class="about-card">
-          <div class="about-icon">🔍</div>
           <h3>Taint Tracking</h3>
           <p>Intra-procedural def-use data flow analysis that traces untrusted sources to critical sinks, with full propagation path reporting.</p>
         </div>
         <div class="about-card">
-          <div class="about-icon">📊</div>
           <h3>Structured Output</h3>
           <p>Deterministic JSON reporting with source coordinates, remediation guidance, confidence scores, and Mermaid attack graph export.</p>
         </div>
@@ -366,8 +344,8 @@
       </div>
       <div class="footer-links">
         <a href="https://github.com/Darshan7455/PyAttackMap" target="_blank">GitHub</a>
-        <a href="#rules-section">Rules</a>
-        <a href="#about-section">About</a>
+        <a href="?page=rules#rules-section">Rules</a>
+        <a href="?page=about#about-section">About</a>
       </div>
       <div class="footer-license">MIT License · C++20 Native Engine</div>
     </div>

@@ -139,14 +139,21 @@ An interactive browser-based frontend for PyAttackMap is available in the `front
 - **Rules Reference**: Built-in documentation for PAM001, PAM002, PAM003
 
 ### Usage
-Open `frontend/index.html` directly in any modern browser — no build step required.
+Open `frontend/index.html` directly in any modern browser — no build step required. To use the separate pages, append one of these query parameters to the URL:
+
+```text
+frontend/index.html?page=scanner
+frontend/index.html?page=rules
+frontend/index.html?page=about
+```
+
+Or serve the frontend with Python, then visit the corresponding URLs:
 
 ```bash
-# Quick start (opens in default browser on Windows)
-start frontend/index.html
-
-# Or serve with any static file server
-npx serve frontend/
+python -m http.server 8000 --directory frontend
+# http://localhost:8000/?page=scanner
+# http://localhost:8000/?page=rules
+# http://localhost:8000/?page=about
 ```
 
 ### Files

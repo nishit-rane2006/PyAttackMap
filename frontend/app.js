@@ -314,29 +314,12 @@ const scanSpeed     = document.getElementById('scan-speed');
 
 // ── Init ──
 document.addEventListener('DOMContentLoaded', () => {
-  initParticles();
   initEditor();
   initDropZone();
   initButtons();
   initNavScroll();
   updateLineNumbers();
 });
-
-/* ── Particles ── */
-function initParticles() {
-  const container = document.getElementById('particles-container');
-  if (!container) return;
-  for (let i = 0; i < 30; i++) {
-    const p = document.createElement('div');
-    p.className = 'particle';
-    p.style.left = Math.random() * 100 + '%';
-    p.style.animationDuration = (8 + Math.random() * 12) + 's';
-    p.style.animationDelay = -(Math.random() * 15) + 's';
-    p.style.width = p.style.height = (1 + Math.random() * 2) + 'px';
-    p.style.opacity = (0.2 + Math.random() * 0.5).toString();
-    container.appendChild(p);
-  }
-}
 
 /* ── Code Editor line numbers ── */
 function initEditor() {
@@ -405,8 +388,16 @@ function initButtons() {
 
 /* ── Nav Active State on Scroll ── */
 function initNavScroll() {
-  const sections = ['scan-section', 'rules-section', 'about-section'];
   const navLinks = { 'scan-section': 'nav-scan', 'rules-section': 'nav-rules', 'about-section': 'nav-about' };
+  const page = document.documentElement.dataset.page;
+  const visibleSection = {
+    scanner: 'scan-section',
+    rules: 'rules-section',
+    about: 'about-section'
+  }[page] || 'scan-section';
+
+  document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+  document.getElementById(navLinks[visibleSection]).classList.add('active');
 
   const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
@@ -418,10 +409,8 @@ function initNavScroll() {
     });
   }, { threshold: 0.4 });
 
-  sections.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) observer.observe(el);
-  });
+  const section = document.getElementById(visibleSection);
+  if (section) observer.observe(section);
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -490,17 +479,17 @@ function renderFindings(findings) {
       </div>
       <div class="finding-title">${f.title}</div>
       <div class="finding-meta">
-        <span>📍 Line ${f.line}</span>
-        <span>🔑 ${f.cwe}</span>
-        <span>🎯 ${f.confidence} confidence</span>
+        <span>Line ${f.line}</span>
+        <span>${f.cwe}</span>
+        <span>${f.confidence} confidence</span>
       </div>
       <div class="finding-desc">${f.desc}</div>
-      <div class="finding-remediation">💡 ${f.remediation}</div>
+      <div class="finding-remediation">Suggestion: ${f.remediation}</div>
     `;
 
     card.addEventListener('click', () => {
       document.querySelectorAll('.finding-card').forEach(c => c.style.outline = '');
-      card.style.outline = '1px solid var(--cyan)';
+      card.style.outline = '1px solid var(--accent)';
       renderDataflow(f);
       const sel = document.getElementById('finding-select');
       sel.value = idx;
@@ -618,33 +607,21 @@ function showToast(msg, type = 'info') {
 
   const toast = document.createElement('div');
   toast.className = 'toast';
-  const colors = { success: '#00f5c4', error: '#ff4757', warn: '#ffa502', info: '#26c6da' };
+  const colors = { success: '#247044', error: '#b42318', warn: '#8a5a00', info: '#2864a5' };
   toast.style.cssText = `
     position: fixed; bottom: 24px; right: 24px; z-index: 9999;
-    background: var(--bg-panel); color: ${colors[type] || colors.info};
+    background: var(--surface); color: ${colors[type] || colors.info};
     border: 1px solid ${colors[type] || colors.info};
-    border-radius: 10px; padding: 12px 20px;
-    font-size: 0.85rem; font-weight: 600; font-family: var(--font-body);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-    animation: slideUp 0.3s ease;
-    backdrop-filter: blur(10px);
+    border-radius: 4px; padding: 10px 14px;
+    font-size: 0.85rem; font-family: var(--font-body);
   `;
   toast.textContent = msg;
   document.body.appendChild(toast);
 
   setTimeout(() => {
-    toast.style.animation = 'fadeOut 0.3s ease forwards';
-    setTimeout(() => toast.remove(), 300);
+    toast.remove();
   }, 2800);
 }
-
-// Toast animations via style tag
-const toastStyle = document.createElement('style');
-toastStyle.textContent = `
-  @keyframes slideUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-  @keyframes fadeOut { from { opacity:1; } to { opacity:0; transform:translateY(5px); } }
-`;
-document.head.appendChild(toastStyle);
 
 /* ── Helpers ── */
 function escHtml(s) {
