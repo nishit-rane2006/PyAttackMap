@@ -30,13 +30,22 @@ mermaid.initialize({
 
 const pageOptions = ['scanner', 'rules', 'guide', 'about'];
 const pageLabels = { guide: 'Getting Started' };
-const categories = ['injection', 'data', 'network', 'output', 'filesystem'];
+const categories = ['injection', 'data', 'network', 'filesystem', 'output'];
 const categoryLabels = {
   injection: 'Injection',
   data: 'Data handling',
   network: 'Network',
-  output: 'Output and logging',
   filesystem: 'Files and secrets',
+  output: 'Output and logging',
+};
+
+const categoryMeta = {
+  all: { label: 'All', icon: '⚡' },
+  injection: { label: 'Injection', icon: '💉' },
+  data: { label: 'Data handling', icon: '💾' },
+  network: { label: 'Network', icon: '🌐' },
+  filesystem: { label: 'Files & Secrets', icon: '📁' },
+  output: { label: 'Output & Logging', icon: '📝' },
 };
 
 function Icon({ name }) {
@@ -512,11 +521,22 @@ function Scanner({ notify }) {
 function Rules() {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('all');
+
+  const categoryCounts = React.useMemo(() => {
+    const counts = { all: Object.keys(RULES).length };
+    for (const rule of Object.values(RULES)) {
+      const cat = RULE_GUIDE[rule.id]?.category;
+      if (cat) counts[cat] = (counts[cat] || 0) + 1;
+    }
+    return counts;
+  }, []);
+
   const rules = Object.values(RULES).filter(rule => {
     const guide = RULE_GUIDE[rule.id];
     const matchesText = !query || `${rule.id} ${rule.title} ${rule.cwe} ${rule.desc} ${rule.sources.join(' ')} ${rule.sinks.join(' ')} ${guide.example}`.toLowerCase().includes(query.toLowerCase());
     return matchesText && (category === 'all' || guide.category === category);
   });
+
   return (
     <section id="rules-section" className="section">
       <div className="section-header">
@@ -524,31 +544,76 @@ function Rules() {
         <h2 className="section-title">Vulnerability field guide</h2>
         <p className="section-subtitle">Explore all 12 detector families: what they mean, the patterns the browser scanner looks for, and safer ways to handle the data.</p>
       </div>
-      <div className="catalog-toolbar">
-        <label className="catalog-search-wrap" htmlFor="rule-search"><span aria-hidden="true">⌕</span><input id="rule-search" type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search a vulnerability, CWE, or code pattern" autoComplete="off" /></label>
-        <label className="sr-only" htmlFor="rule-category">Filter by category</label>
-        <select id="rule-category" className="config-select catalog-filter" value={category} onChange={event => setCategory(event.target.value)}>
-          <option value="all">All categories</option>{categories.map(item => <option key={item} value={item}>{categoryLabels[item]}</option>)}
-        </select>
-        <span className="catalog-count">{rules.length} of {Object.keys(RULES).length} detectors</span>
-      </div>
-      <div className="rules-grid">
-        {rules.map(rule => {
-          const guide = RULE_GUIDE[rule.id];
+
+      <div className="category-pills" role="tablist" aria-label="Filter rules by category">
+        {['all', ...categories].map(cat => {
+          const meta = categoryMeta[cat] || { label: cat, icon: '🏷️' };
+          const count = categoryCounts[cat] || 0;
+          const isActive = category === cat;
           return (
-            <article className="rule-card" data-rule={rule.id} key={rule.id}>
-              <div className="rule-header"><span className="rule-id">{rule.id}</span><span className={`rule-severity sev-${rule.severity.toLowerCase()}`}>{rule.severity}</span></div>
-              <span className="guide-category">{guide.category}</span>
-              <h3 className="rule-title">{rule.title}</h3>
-              <p className="rule-cwe">{rule.cwe}</p>
-              <p className="rule-desc">{rule.desc}</p>
-              <div className="rule-sources">{rule.sources.slice(0, 3).map(source => <span className="tag" key={source}>{source}</span>)}</div>
-              <div className="rule-sinks">{rule.sinks.slice(0, 3).map(sink => <span className="sink-tag" key={sink}>{sink}</span>)}</div>
-              <details className="guide-details"><summary>See example and safer pattern</summary><span className="guide-label">Risk pattern</span><pre className="guide-code">{guide.example}</pre><span className="guide-label">Safer approach</span><pre className="guide-code guide-code-safe">{guide.safer}</pre></details>
-            </article>
+            <button
+              key={cat}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              className={`category-pill${isActive ? ' active' : ''}`}
+              onClick={() => setCategory(cat)}
+            >
+              <span className="pill-icon" aria-hidden="true">{meta.icon}</span>
+              <span className="pill-label">{meta.label}</span>
+              <span className="pill-count">{count}</span>
+            </button>
           );
         })}
       </div>
+
+      <div className="catalog-toolbar">
+        <label className="catalog-search-wrap" htmlFor="rule-search">
+          <span aria-hidden="true">⌕</span>
+          <input
+            id="rule-search"
+            type="search"
+            value={query}
+            onChange={event => setQuery(event.target.value)}
+            placeholder="Search a vulnerability, rule ID, CWE, or code pattern"
+            autoComplete="off"
+          />
+          {query && (
+            <button className="search-clear-btn" type="button" onClick={() => setQuery('')} aria-label="Clear search">
+              ✕
+            </button>
+          )}
+        </label>
+        <span className="catalog-count">{rules.length} of {Object.keys(RULES).length} detectors</span>
+      </div>
+
+      {rules.length === 0 ? (
+        <div className="rules-empty-state">
+          <p className="empty-title">No detectors found</p>
+          <p className="empty-subtitle">No security rules matched your current search and category filters.</p>
+          <button className="btn-secondary btn-sm" type="button" onClick={() => { setQuery(''); setCategory('all'); }}>
+            Reset filters
+          </button>
+        </div>
+      ) : (
+        <div className="rules-grid">
+          {rules.map(rule => {
+            const guide = RULE_GUIDE[rule.id];
+            return (
+              <article className="rule-card" data-rule={rule.id} key={rule.id}>
+                <div className="rule-header"><span className="rule-id">{rule.id}</span><span className={`rule-severity sev-${rule.severity.toLowerCase()}`}>{rule.severity}</span></div>
+                <span className="guide-category">{guide.category}</span>
+                <h3 className="rule-title">{rule.title}</h3>
+                <p className="rule-cwe">{rule.cwe}</p>
+                <p className="rule-desc">{rule.desc}</p>
+                <div className="rule-sources">{rule.sources.slice(0, 3).map(source => <span className="tag" key={source}>{source}</span>)}</div>
+                <div className="rule-sinks">{rule.sinks.slice(0, 3).map(sink => <span className="sink-tag" key={sink}>{sink}</span>)}</div>
+                <details className="guide-details"><summary>See example and safer pattern</summary><span className="guide-label">Risk pattern</span><pre className="guide-code">{guide.example}</pre><span className="guide-label">Safer approach</span><pre className="guide-code guide-code-safe">{guide.safer}</pre></details>
+              </article>
+            );
+          })}
+        </div>
+      )}
     </section>
   );
 }
