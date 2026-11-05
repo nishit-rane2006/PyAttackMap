@@ -36,11 +36,15 @@ dev = [
 [project.scripts]
 pyattackmap = "pyattackmap.cli:main"
 
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.setuptools]
+packages = ["pyattackmap", "pyattackmap.dataflow", "pyattackmap.rules"]
+
+[tool.setuptools.package-dir]
+pyattackmap = "legacy_python"
+"pyattackmap.dataflow" = "legacy_python/dataflow"
+"pyattackmap.rules" = "legacy_python/rules"
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["legacy_python/tests"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
-

@@ -3,7 +3,8 @@ import { createRoot } from 'react-dom/client';
 import { DEMO_CODE, RULES, RULE_GUIDE, TaintAnalyzer, toMermaid } from '../scanner.js';
 import '../style.css';
 
-const pageOptions = ['scanner', 'rules', 'about'];
+const pageOptions = ['scanner', 'rules', 'guide', 'about'];
+const pageLabels = { guide: 'Getting Started' };
 const categories = ['injection', 'data', 'network', 'output', 'filesystem'];
 const categoryLabels = {
   injection: 'Injection',
@@ -31,7 +32,7 @@ function Navbar({ page }) {
       <nav className="navbar-links" aria-label="Main navigation">
         {pageOptions.map(item => (
           <a key={item} href={`?page=${item}#${item === 'scanner' ? 'scan' : item}-section`} className={`nav-link${page === item ? ' active' : ''}`}>
-            {item[0].toUpperCase() + item.slice(1)}
+            {pageLabels[item] || item[0].toUpperCase() + item.slice(1)}
           </a>
         ))}
       </nav>
@@ -405,6 +406,109 @@ function About() {
   );
 }
 
+function Guide() {
+  return (
+    <section id="guide-section" className="section">
+      <div className="section-header">
+        <span className="section-kicker">Install, configure, and scan</span>
+        <h2 className="section-title">Getting Started</h2>
+        <p className="section-subtitle">Build the native scanner, start the browser interface, and run your first Python source scan.</p>
+      </div>
+      <div className="guide-download">
+        <div>
+          <h3>Keep a copy of this guide</h3>
+          <p>Download the installation and usage instructions as a Markdown file.</p>
+        </div>
+        <a className="btn-primary" href={`${import.meta.env.BASE_URL}getting-started.md`} download="pyattackmap-getting-started.md">Download guide</a>
+      </div>
+      <div className="guide-sections">
+        <article className="about-card guide-card">
+          <span className="section-kicker">01 · Requirements</span>
+          <h3>Prepare your environment</h3>
+          <ul>
+            <li>CMake 3.20 or newer</li>
+            <li>Ninja build system</li>
+            <li>A C++20 compiler: GCC 11+, Clang 14+, or Visual Studio 2022</li>
+            <li>Python 3.11 or newer to install and use the Python library</li>
+            <li>Node.js and npm if you want to run the web frontend</li>
+          </ul>
+          <p>CMake fetches the native build dependencies (Tree-sitter, the Tree-sitter Python grammar, nlohmann/json, and GoogleTest) during configuration, so network access is needed for the initial configure.</p>
+          <h3>Download and install the Python library</h3>
+          <p>The Python library is not currently published on PyPI. Download the project source as a ZIP or clone it, then install it from the extracted repository root:</p>
+          <p><a className="guide-source-download" href="https://github.com/nishit-rane2006/PyAttackMap/archive/refs/heads/main.zip">Download Python library source (.zip)</a></p>
+          <pre className="guide-code"><code>{`git clone https://github.com/nishit-rane2006/PyAttackMap.git
+cd PyAttackMap
+python -m pip install .
+
+# Optional: install development/test dependencies
+python -m pip install -e ".[dev]"`}</code></pre>
+          <p>After installation, run <code>pyattackmap --help</code> for the Python CLI, or import <code>pyattackmap</code> in your Python code.</p>
+        </article>
+        <article className="about-card guide-card">
+          <span className="section-kicker">02 · Native installation</span>
+          <h3>Build and test the C++ scanner</h3>
+          <p>From the project root, configure the Release preset, build it, then run the test suite:</p>
+          <pre className="guide-code"><code>{`cmake --preset release
+cmake --build --preset release
+ctest --preset release`}</code></pre>
+          <p>The CLI is created at <code>build/release/pyattackmap</code> (Linux/macOS) or <code>build\\release\\pyattackmap.exe</code> (Windows). To install the library, executable, and headers to a prefix:</p>
+          <pre className="guide-code"><code>{`cmake --install build/release --prefix install`}</code></pre>
+          <p>On Windows PowerShell, invoke the executable with <code>.\build\release\pyattackmap.exe</code>. The optional prefix can be changed to an installation location of your choice.</p>
+        </article>
+        <article className="about-card guide-card">
+          <span className="section-kicker">03 · Scan with the CLI</span>
+          <h3>Analyze a Python file or project</h3>
+          <p>Pass a Python file or directory to the scan command. Here are common examples from the project root:</p>
+          <pre className="guide-code"><code>{`# Windows PowerShell
+.\\build\\release\\pyattackmap.exe scan .\\my_project
+.\\build\\release\\pyattackmap.exe scan .\\app.py -f json -o report.json
+
+# Linux / macOS
+./build/release/pyattackmap scan ./my_project
+./build/release/pyattackmap scan ./app.py -f json -o report.json
+
+# Filter by minimum severity and exclude paths
+pyattackmap scan ./my_project -s HIGH -e "tests/*" -e "docs/*"
+
+# See supported rules and all CLI options
+pyattackmap rules
+pyattackmap --help`}</code></pre>
+          <p>Supported output formats are <code>text</code> and <code>json</code>. You can also set worker threads with <code>-j</code> and disable data-flow graph generation with <code>--no-dataflow</code>. Exit codes: <code>0</code> no findings, <code>1</code> findings detected, <code>2</code> usage/configuration error, <code>3</code> execution or file-access error.</p>
+        </article>
+        <article className="about-card guide-card">
+          <span className="section-kicker">04 · Browser frontend</span>
+          <h3>Start the web interface</h3>
+          <p>From the frontend directory, install npm dependencies and start the development server:</p>
+          <pre className="guide-code"><code>{`cd frontend
+npm install
+npm run dev`}</code></pre>
+          <p>Open the local address printed by Vite. For a production build, run <code>npm run build</code>, then preview it with <code>npm run preview</code>. The browser scanner works on pasted code or an uploaded Python file; it does not scan project directories.</p>
+        </article>
+        <article className="about-card guide-card">
+          <span className="section-kicker">05 · C++ integration</span>
+          <h3>Call the library from C++</h3>
+          <p>Link your application with <code>pyattackmap_lib</code> and include the public API:</p>
+          <pre className="guide-code"><code>{`#include <iostream>
+#include <pyattackmap/pyattackmap.hpp>
+
+int main() {
+    auto result = pyattackmap::scan("./src");
+    std::cout << result.summary() << "\\n";
+    result.to_json("report.json");
+}`}</code></pre>
+          <p>The public helpers also include <code>pyattackmap::scan_file(...)</code> and <code>pyattackmap::scan_code(...)</code>. Configure options such as minimum severity and excluded paths with <code>pyattackmap::ScanConfig</code>.</p>
+        </article>
+        <article className="about-card guide-card">
+          <span className="section-kicker">06 · What to expect</span>
+          <h3>Understand the scanner scope</h3>
+          <p>The native engine currently registers three rules: PAM001 SQL injection (CWE-89), PAM002 command injection (CWE-78), and PAM003 unsafe deserialization (CWE-502). It performs intra-procedural static analysis and does not execute the target code.</p>
+          <p>The browser scanner is a separate, pattern-based learning tool with 12 detector guides. Its coverage is not the same as the native engine. Static analysis can miss issues or report false positives; review results in the context of your application.</p>
+        </article>
+      </div>
+    </section>
+  );
+}
+
 function App() {
   const params = new URLSearchParams(window.location.search);
   const requestedPage = params.get('page');
@@ -430,12 +534,13 @@ function App() {
       <main className="main-content">
         {page === 'scanner' && <Scanner notify={notify} />}
         {page === 'rules' && <Rules />}
+        {page === 'guide' && <Guide />}
         {page === 'about' && <About />}
       </main>
       <footer className="footer">
         <div className="footer-content">
           <div className="footer-brand"><span className="brand-name small">PyAttack<span className="brand-accent">Map</span></span><span className="footer-tagline">Explainable Static Security Analysis</span></div>
-          <div className="footer-links"><a href="https://github.com/nishit-rane2006/PyAttackMap" target="_blank" rel="noreferrer">GitHub</a><a href="?page=rules#rules-section">Rules</a><a href="?page=about#about-section">About</a></div>
+          <div className="footer-links"><a href="https://github.com/nishit-rane2006/PyAttackMap" target="_blank" rel="noreferrer">GitHub</a><a href="?page=rules#rules-section">Rules</a><a href="?page=guide#guide-section">Getting Started</a><a href="?page=about#about-section">About</a></div>
           <div className="footer-license">MIT License · C++20 Native Engine</div>
         </div>
       </footer>
