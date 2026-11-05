@@ -45,6 +45,9 @@ wheels/
 .installed.cfg
 *.egg
 
+# Node
+node_modules/
+
 # Virtual Environments
 .venv/
 venv/
@@ -71,4 +74,3 @@ Thumbs.db
 # Package archives
 *.zip
 *.tar.gz
-

@@ -442,6 +442,7 @@ textarea:focus-visible,
   font-size: 0.78rem;
   line-height: 1.6;
   text-align: right;
+  white-space: pre;
   user-select: none;
 }
 
@@ -1020,6 +1021,26 @@ textarea:focus-visible,
   background: var(--surface);
   box-shadow: 0 10px 28px rgb(23 36 56 / 15%);
   font-size: 0.85rem;
+}
+
+.toast-success {
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.toast-error {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.toast-warn {
+  border-color: var(--warning);
+  color: var(--warning);
+}
+
+.toast-info {
+  border-color: #2864a5;
+  color: #2864a5;
 }
 
 @media (max-width: 850px) {

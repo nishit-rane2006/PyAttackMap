@@ -128,7 +128,7 @@ int main() {
 
 ## Web Frontend Dashboard
 
-An interactive browser-based frontend for PyAttackMap is available in the `frontend/` directory.
+An interactive React browser frontend for PyAttackMap is available in the `frontend/` directory.
 
 ### Features
 - **Code Scanner**: Paste Python source or upload a `.py` file and run simulated taint analysis
@@ -141,29 +141,23 @@ An interactive browser-based frontend for PyAttackMap is available in the `front
 The browser scanner includes PAM001–PAM012, covering SQL and command injection, unsafe deserialization, path traversal, eval/exec injection, SSRF, open redirects, exposed secrets, log injection, XSS, and unsafe file writes. The native C++ CLI currently registers PAM001–PAM003.
 
 ### Usage
-Open `frontend/index.html` directly in any modern browser — no build step required. To use the separate pages, append one of these query parameters to the URL:
-
-```text
-frontend/index.html?page=scanner
-frontend/index.html?page=rules
-frontend/index.html?page=about
-```
-
-Or serve the frontend with Python, then visit the corresponding URLs:
+Run the frontend development server from the `frontend/` directory:
 
 ```bash
-python -m http.server 8000 --directory frontend
-# http://localhost:8000/?page=scanner
-# http://localhost:8000/?page=rules
-# http://localhost:8000/?page=about
+npm install
+npm run dev
 ```
 
-### Files
-| File | Description |
-|------|-------------|
-| `frontend/index.html` | Main dashboard HTML |
-| `frontend/style.css`  | Dark cyberpunk theme stylesheet |
-| `frontend/app.js`     | Taint analysis engine + UI logic |
+To create and preview a production build:
+
+```bash
+npm run build
+npm run preview
+```
+
+The scanner, rules guide, and about page remain available at `/?page=scanner`, `/?page=rules`, and `/?page=about`.
+
+The browser scanner is a lightweight pattern-based simulation; use the native C++ CLI for project-wide analysis.
 
 ---
 
