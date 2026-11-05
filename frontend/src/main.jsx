@@ -19,6 +19,7 @@ function Icon({ name }) {
     file: <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14,2 14,8 20,8" /></>,
     trash: <><polyline points="3,6 5,6 21,6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" /></>,
     search: <><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></>,
+    upload: <><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></>,
   };
   return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">{paths[name]}</svg>;
 }
@@ -165,10 +166,25 @@ function Scanner({ notify }) {
   }
 
   async function loadFile(file) {
+    if (!file) return;
+    const validExtensions = ['.py', '.pyw', '.pyi', '.txt'];
+    const hasValidExt = validExtensions.some(ext => file.name.toLowerCase().endsWith(ext));
+    if (!hasValidExt) {
+      notify(`Unsupported file type: "${file.name}". Please upload a Python file (.py).`, 'warn');
+      return;
+    }
+    const maxSizeBytes = 2 * 1024 * 1024; // 2MB
+    if (file.size > maxSizeBytes) {
+      notify(`File is too large (${(file.size / (1024 * 1024)).toFixed(1)} MB). Max limit is 2MB.`, 'error');
+      return;
+    }
     try {
-      setCode(await file.text());
+      const text = await file.text();
+      setCode(text);
       setFilename(file.name);
       clearResults();
+      const kbSize = (file.size / 1024).toFixed(1);
+      notify(`Loaded ${file.name} (${kbSize} KB)`, 'success');
     } catch (error) {
       notify(`Could not read ${file.name}: ${error.message}`, 'error');
     }
@@ -246,7 +262,7 @@ function Scanner({ notify }) {
   function acceptDrop(event) {
     event.preventDefault();
     setDragOver(false);
-    const file = event.dataTransfer.files[0];
+    const file = event.dataTransfer?.files?.[0];
     if (file) void loadFile(file);
   }
 
@@ -262,20 +278,51 @@ function Scanner({ notify }) {
           <div className="panel-header">
             <span className="panel-title">Python Source Input</span>
             <div className="panel-actions">
-              <button className="btn-icon" type="button" onClick={() => { setCode(DEMO_CODE); setFilename('vulnerable.py'); clearResults(); }}><Icon name="file" />Demo</button>
-              <button className="btn-icon" type="button" onClick={() => { setCode(''); setFilename('untitled.py'); clearResults(); }}><Icon name="trash" />Clear</button>
+              <button className="btn-icon" type="button" onClick={() => fileInputRef.current?.click()} title="Upload Python file">
+                <Icon name="upload" />Upload
+              </button>
+              <button className="btn-icon" type="button" onClick={() => { setCode(DEMO_CODE); setFilename('vulnerable.py'); clearResults(); }}>
+                <Icon name="file" />Demo
+              </button>
+              <button className="btn-icon" type="button" onClick={() => { setCode(''); setFilename('untitled.py'); clearResults(); }}>
+                <Icon name="trash" />Clear
+              </button>
             </div>
           </div>
           <div
             className={`drop-zone${dragOver ? ' drag-over' : ''}`}
             onDragOver={event => { event.preventDefault(); setDragOver(true); }}
-            onDragLeave={() => setDragOver(false)}
+            onDragLeave={event => {
+              if (event.currentTarget.contains(event.relatedTarget)) return;
+              setDragOver(false);
+            }}
             onDrop={acceptDrop}
           >
-            <p className="drop-text">Drop <code>.py</code> file here or <button className="file-label" type="button" onClick={() => fileInputRef.current?.click()}>browse</button></p>
-            <input ref={fileInputRef} type="file" accept=".py,.txt" hidden onChange={event => { const file = event.target.files?.[0]; if (file) void loadFile(file); event.target.value = ''; }} />
+            <p className="drop-text">
+              <Icon name="upload" /> Drop a <code>.py</code> file here or{' '}
+              <button className="file-label" type="button" onClick={() => fileInputRef.current?.click()}>browse</button>
+            </p>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".py,.pyw,.pyi,.txt"
+              hidden
+              onChange={event => {
+                const file = event.target.files?.[0];
+                if (file) void loadFile(file);
+                event.target.value = '';
+              }}
+            />
           </div>
-          <div className="code-editor-wrapper">
+          <div
+            className={`code-editor-wrapper${dragOver ? ' drag-over-editor' : ''}`}
+            onDragOver={event => { event.preventDefault(); setDragOver(true); }}
+            onDragLeave={event => {
+              if (event.currentTarget.contains(event.relatedTarget)) return;
+              setDragOver(false);
+            }}
+            onDrop={acceptDrop}
+          >
             <div className="editor-header"><span className="file-name">{filename}</span><span className="line-count">{lines.length} lines</span></div>
             <div className="line-numbers" ref={lineNumbersRef} aria-hidden="true">{lines.map((_, index) => index + 1).join('\n')}</div>
             <textarea
