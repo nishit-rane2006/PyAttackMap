@@ -136,7 +136,9 @@ An interactive browser-based frontend for PyAttackMap is available in the `front
 - **Data-Flow Graphs**: Interactive attack path visualization showing SOURCE → TAINT → SINK propagation chains
 - **Mermaid Export**: One-click copy of Mermaid flowchart syntax for embedding in docs/reports
 - **JSON Export**: Download structured scan reports as `pyattackmap_report.json`
-- **Rules Reference**: Built-in documentation for PAM001, PAM002, PAM003
+- **Rules Reference**: Built-in documentation for all browser scanner rules
+
+The browser scanner includes PAM001–PAM012, covering SQL and command injection, unsafe deserialization, path traversal, eval/exec injection, SSRF, open redirects, exposed secrets, log injection, XSS, and unsafe file writes. The native C++ CLI currently registers PAM001–PAM003.
 
 ### Usage
 Open `frontend/index.html` directly in any modern browser — no build step required. To use the separate pages, append one of these query parameters to the URL:

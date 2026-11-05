@@ -29,7 +29,7 @@
         <span class="status-dot pulse"></span>
         <span class="status-text">Engine Ready</span>
       </div>
-      <button class="btn-github" onclick="window.open('https://github.com/Darshan7455/PyAttackMap','_blank')" id="github-btn">
+      <button class="btn-github" onclick="window.open('https://github.com/nishit-rane2006','_blank')" id="github-btn">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
         GitHub
       </button>
@@ -38,15 +38,24 @@
 
   <!-- ── HERO BANNER ── -->
   <section class="hero" id="hero-section">
-    <div class="hero-content">
-      <div class="hero-eyebrow">Python security scanner</div>
-      <h1 class="hero-title">Check your Python code for common security issues</h1>
-      <p class="hero-subtitle">
-        Paste code or upload a Python file to see possible security problems and how data flows through your code.
-      </p>
-      <button class="btn-primary hero-cta" id="start-scan-hero-btn" onclick="document.getElementById('scan-section').scrollIntoView({behavior:'smooth'})">
-        Start Scanning
-      </button>
+    <div class="hero-inner">
+      <div class="hero-content">
+        <div class="hero-eyebrow"><span class="hero-dot"></span> Python security, made explainable</div>
+        <h1 class="hero-title">Find the risky path through your Python code.</h1>
+        <p class="hero-subtitle">Scan a file in your browser, follow untrusted input to sensitive operations, and learn how to fix each issue.</p>
+        <div class="hero-actions">
+          <button class="btn-primary hero-cta" id="start-scan-hero-btn" onclick="document.getElementById('scan-section').scrollIntoView({behavior:'smooth'})">Open the scanner <span aria-hidden="true">→</span></button>
+          <a class="hero-secondary" href="?page=rules#rules-section">Explore the detector guide</a>
+        </div>
+        <div class="hero-facts"><span><strong>12</strong> detector guides</span><span><strong>Local</strong> browser scan</span><span><strong>Line by line</strong> findings</span></div>
+      </div>
+      <div class="hero-preview" aria-label="Example finding preview">
+        <div class="preview-topbar"><span class="preview-lights"><i></i><i></i><i></i></span><span>example.py</span><span class="preview-status">PAM001 · HIGH</span></div>
+        <pre><code><span class="code-muted">01</span> user_id = request.args[<span class="code-string">"id"</span>]
+<span class="code-muted">02</span> query = <span class="code-string">"SELECT * FROM users WHERE id="</span> + user_id
+<span class="code-muted">03</span> cursor.execute(query)</code></pre>
+        <div class="preview-finding"><span class="preview-flow">SOURCE <b>→</b> QUERY <b>→</b> SINK</span><span>Untrusted input reaches a SQL query.</span></div>
+      </div>
     </div>
   </section>
 
@@ -56,10 +65,9 @@
     <!-- ── SCAN SECTION ── -->
     <section id="scan-section" class="section">
       <div class="section-header">
-        <h2 class="section-title">
-          Code Scanner
-        </h2>
-        <p class="section-subtitle">Paste Python code or upload a .py file to detect security vulnerabilities</p>
+        <span class="section-kicker">Try it with your code</span>
+        <h2 class="section-title">Code scanner</h2>
+        <p class="section-subtitle">Paste a snippet or upload a <code>.py</code> file. The browser scanner checks for risky patterns and shows the data flow behind each finding.</p>
       </div>
 
       <div class="scanner-layout">
@@ -227,8 +235,22 @@
     <!-- ── RULES SECTION ── -->
     <section id="rules-section" class="section">
       <div class="section-header">
-        <h2 class="section-title">Security Rules</h2>
-        <p class="section-subtitle">Built-in detection rules powered by intra-procedural taint analysis</p>
+        <span class="section-kicker">Learn the patterns</span>
+        <h2 class="section-title">Vulnerability field guide</h2>
+        <p class="section-subtitle">Explore all 12 detector families: what they mean, the patterns the browser scanner looks for, and safer ways to handle the data.</p>
+      </div>
+      <div class="catalog-toolbar">
+        <label class="catalog-search-wrap" for="rule-search"><span aria-hidden="true">⌕</span><input id="rule-search" type="search" placeholder="Search a vulnerability, CWE, or code pattern" autocomplete="off" /></label>
+        <label class="sr-only" for="rule-category">Filter by category</label>
+        <select id="rule-category" class="config-select catalog-filter">
+          <option value="all">All categories</option>
+          <option value="injection">Injection</option>
+          <option value="data">Data handling</option>
+          <option value="network">Network</option>
+          <option value="output">Output and logging</option>
+          <option value="filesystem">Files and secrets</option>
+        </select>
+        <span class="catalog-count" id="catalog-count">12 detectors</span>
       </div>
       <div class="rules-grid" id="rules-grid">
         <div class="rule-card" data-rule="PAM001">
@@ -343,7 +365,7 @@
         <span class="footer-tagline">Explainable Static Security Analysis</span>
       </div>
       <div class="footer-links">
-        <a href="https://github.com/Darshan7455/PyAttackMap" target="_blank">GitHub</a>
+        <a href="https://github.com/nishit-rane2006" target="_blank">GitHub</a>
         <a href="?page=rules#rules-section">Rules</a>
         <a href="?page=about#about-section">About</a>
       </div>

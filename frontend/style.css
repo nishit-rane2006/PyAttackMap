@@ -1129,6 +1129,175 @@ textarea:focus-visible,
   }
 }
 
+/* Clean documentation-led visual system, inspired by NumPy's open project site. */
+:root {
+  --page: #ffffff;
+  --surface: #ffffff;
+  --surface-muted: #f5f8fb;
+  --border: #d9e3ec;
+  --text: #202b3c;
+  --text-muted: #5f6e80;
+  --accent: #3978a8;
+  --accent-hover: #285d87;
+  --code-bg: #f2f6fa;
+  --font-body: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+}
+
+body {
+  background: #fff;
+  color: var(--text);
+}
+
+.navbar {
+  min-height: 72px;
+  padding-right: max(28px, calc((100% - 1200px) / 2));
+  padding-left: max(28px, calc((100% - 1200px) / 2));
+  background: rgb(255 255 255 / 96%);
+  box-shadow: none;
+}
+
+.brand-name { font-size: 1.26rem; }
+.brand-accent { color: #3978a8; }
+.navbar-links { border: 0; background: transparent; }
+.nav-link { border-radius: 7px; }
+.nav-link:hover,
+.nav-link.active { background: #edf4f9; color: #285d87; box-shadow: none; }
+.status-dot { background: #4d9976; }
+
+.hero {
+  padding: 74px 28px 82px;
+  background: linear-gradient(115deg, #f1f7fb 0%, #f8fbfd 54%, #eef6fa 100%);
+  color: var(--text);
+  text-align: left;
+}
+
+.hero-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(340px, 0.78fr);
+  align-items: center;
+  gap: clamp(40px, 8vw, 100px);
+  width: min(1160px, 100%);
+  margin: 0 auto;
+}
+
+.hero-content { max-width: 620px; margin: 0; }
+.hero-eyebrow {
+  margin-bottom: 19px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #3978a8;
+  font-size: 0.78rem;
+  letter-spacing: 0.09em;
+}
+.hero-dot { width: 8px; height: 8px; border-radius: 50%; background: #3978a8; }
+.hero-title {
+  max-width: 650px;
+  margin: 0 0 18px;
+  font-size: clamp(2.6rem, 5.5vw, 4.65rem);
+  letter-spacing: -0.065em;
+  line-height: 1.02;
+}
+.hero-subtitle {
+  max-width: 560px;
+  margin: 0 0 25px;
+  color: #53657a;
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+.hero-actions { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+.hero-cta { background: #3978a8; border-color: #3978a8; box-shadow: none; }
+.hero-cta:hover { background: #285d87; border-color: #285d87; box-shadow: none; }
+.hero-secondary { color: #285d87; font-size: 0.9rem; font-weight: 650; text-decoration: none; }
+.hero-secondary:hover { text-decoration: underline; }
+.hero-facts { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 29px; color: #68788a; font-size: 0.78rem; }
+.hero-facts strong { color: #26384a; }
+
+.hero-preview {
+  overflow: hidden;
+  border: 1px solid #d8e4ed;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 24px 60px rgb(38 65 87 / 12%);
+  transform: rotate(1deg);
+}
+.preview-topbar { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-bottom: 1px solid #e6edf2; color: #617185; font: 0.76rem var(--font-code); }
+.preview-lights { display: flex; gap: 4px; }
+.preview-lights i { width: 7px; height: 7px; border-radius: 50%; background: #c8d6e2; }
+.preview-lights i:first-child { background: #dc8c83; }
+.preview-status { margin-left: auto; color: #a74338; font-size: 0.67rem; font-weight: 700; }
+.hero-preview pre { margin: 0; padding: 23px 20px; overflow-x: auto; background: #f8fafc; color: #2a3b4d; font: 0.77rem/2 var(--font-code); }
+.code-muted { color: #9aa9b7; user-select: none; }
+.code-string { color: #3f7c68; }
+.preview-finding { display: flex; flex-direction: column; gap: 5px; padding: 15px 18px; color: #56687a; font-size: 0.79rem; }
+.preview-flow { color: #3978a8; font: 700 0.66rem var(--font-code); letter-spacing: 0.06em; }
+.preview-flow b { padding: 0 4px; color: #94aabd; }
+
+.main-content { width: min(1160px, calc(100% - 56px)); }
+.section { padding-top: 66px; }
+.section-kicker { display: block; margin-bottom: 7px; color: #3978a8; font-size: 0.74rem; font-weight: 750; letter-spacing: 0.1em; text-transform: uppercase; }
+.section-title { font-size: clamp(1.9rem, 3vw, 2.5rem); letter-spacing: -0.055em; }
+.section-subtitle { max-width: 720px; font-size: 1rem; line-height: 1.65; }
+.panel, .rule-card, .about-card { border-radius: 13px; box-shadow: 0 8px 26px rgb(38 65 87 / 5%); }
+.panel:hover { border-color: #c6d6e2; box-shadow: 0 12px 32px rgb(38 65 87 / 8%); }
+.panel-header { background: #fbfcfd; }
+.drop-zone { background: #f8fbfd; }
+.drop-zone:hover, .drop-zone.drag-over { background: #edf5fa; }
+.btn-primary { background: #3978a8; border-color: #3978a8; box-shadow: none; }
+.btn-primary:hover { background: #285d87; border-color: #285d87; box-shadow: none; }
+.config-select { border-radius: 6px; }
+.node-source { border-color: #a7c4dc; background: #eff6fb; }
+.node-sink { border-color: #dfb0aa; background: #fff5f3; }
+
+.catalog-toolbar { display: flex; align-items: center; gap: 12px; margin: -4px 0 22px; flex-wrap: wrap; }
+.catalog-search-wrap { display: flex; flex: 1 1 360px; align-items: center; gap: 9px; min-height: 42px; padding: 0 12px; border: 1px solid var(--border); border-radius: 7px; background: #fff; color: #718196; }
+.catalog-search-wrap:focus-within { border-color: #7ba5c3; box-shadow: 0 0 0 3px rgb(57 120 168 / 11%); }
+.catalog-search-wrap > span { font-size: 1.25rem; }
+.catalog-search-wrap input { width: 100%; border: 0; outline: 0; color: var(--text); font: inherit; font-size: 0.88rem; }
+.catalog-search-wrap input::placeholder { color: #8998a7; }
+.catalog-filter { min-width: 165px; min-height: 42px; }
+.catalog-count { color: var(--text-muted); font-size: 0.8rem; white-space: nowrap; }
+.rules-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.rule-card { padding: 21px; border-radius: 10px; box-shadow: 0 4px 18px rgb(38 65 87 / 4%); }
+.rule-card::before { height: 2px; background: #73a6c8; }
+.rule-card:hover { border-color: #b6ccdc; box-shadow: 0 12px 28px rgb(38 65 87 / 9%); transform: translateY(-2px); }
+.rule-header { margin-bottom: 8px; }
+.rule-title { margin-top: 7px; font-size: 1.08rem; }
+.rule-cwe { margin-bottom: 9px; }
+.rule-desc { min-height: 4.2em; color: #586a7c; line-height: 1.55; }
+.guide-category { display: inline-flex; margin-top: 4px; padding: 3px 7px; border-radius: 999px; background: #eef4f8; color: #4c6d87; font-size: 0.67rem; font-weight: 700; text-transform: capitalize; }
+.rule-sources, .rule-sinks { margin-top: 7px; }
+.tag, .sink-tag { border-radius: 4px; background: #f6f9fb; }
+.guide-details { margin-top: 15px; padding-top: 12px; border-top: 1px solid #e6edf2; }
+.guide-details summary { color: #326d99; cursor: pointer; font-size: 0.8rem; font-weight: 700; }
+.guide-details summary:hover { color: #204f75; }
+.guide-label { display: block; margin: 13px 0 5px; color: #718196; font-size: 0.68rem; font-weight: 750; letter-spacing: 0.06em; text-transform: uppercase; }
+.guide-code { margin: 0; padding: 10px; overflow-x: auto; border: 1px solid #e2eaf0; border-radius: 6px; background: #f7f9fb; color: #344b5d; font: 0.71rem/1.6 var(--font-code); white-space: pre-wrap; overflow-wrap: anywhere; }
+.guide-code-safe { border-color: #d8e8df; background: #f4faf6; color: #315d45; }
+.rule-card[hidden] { display: none; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.footer { margin-top: 40px; background: #f8fafc; }
+
+@media (max-width: 850px) {
+  .hero-inner { grid-template-columns: 1fr; gap: 34px; }
+  .hero-content { max-width: 720px; }
+  .hero-preview { width: min(620px, 100%); transform: none; }
+  .rules-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 600px) {
+  .hero { padding: 52px 18px 56px; }
+  .hero-title { font-size: clamp(2.3rem, 12vw, 3.4rem); }
+  .hero-facts { gap: 12px 18px; }
+  .main-content { width: min(100% - 28px, 1120px); }
+  .section { padding-top: 44px; }
+  .catalog-toolbar { align-items: stretch; }
+  .catalog-search-wrap { flex-basis: 100%; }
+  .catalog-filter { flex: 1; }
+  .catalog-count { align-self: center; }
+  .rules-grid { grid-template-columns: 1fr; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
