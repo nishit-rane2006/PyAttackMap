@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import mermaid from 'mermaid';
 import { DEMO_CODE, RULES, RULE_GUIDE, TaintAnalyzer, toMermaid } from '../scanner.js';
@@ -48,6 +48,15 @@ const categoryMeta = {
   output: { label: 'Output & Logging', icon: '📝' },
 };
 
+function useDarkMode() {
+  const [dark, setDark] = useState(() => localStorage.getItem('pam-dark') === '1');
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', dark);
+    localStorage.setItem('pam-dark', dark ? '1' : '0');
+  }, [dark]);
+  return [dark, setDark];
+}
+
 function Icon({ name }) {
   const paths = {
     file: <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14,2 14,8 20,8" /></>,
@@ -56,11 +65,12 @@ function Icon({ name }) {
     upload: <><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></>,
     diagram: <><rect x="3" y="3" width="6" height="6" rx="1" /><rect x="15" y="3" width="6" height="6" rx="1" /><rect x="9" y="15" width="6" height="6" rx="1" /><path d="M6 9v3a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9" /><line x1="12" y1="14" x2="12" y2="15" /></>,
     code: <><polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" /></>,
+    copy: <><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></>,
   };
   return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">{paths[name]}</svg>;
 }
 
-function Navbar({ page }) {
+function Navbar({ page, dark, onToggleDark }) {
   return (
     <header className="navbar" id="main-navbar">
       <div className="navbar-brand">
@@ -78,6 +88,15 @@ function Navbar({ page }) {
           <span className="status-dot pulse" />
           <span className="status-text">Engine Ready</span>
         </div>
+        <button
+          className="btn-icon dark-toggle"
+          type="button"
+          onClick={onToggleDark}
+          title={dark ? 'Switch to light mode' : 'Switch to dark mode'}
+          aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          {dark ? '☀' : '☾'}
+        </button>
         <a className="btn-github" href="https://github.com/nishit-rane2006/PyAttackMap" target="_blank" rel="noreferrer">
           GitHub
         </a>
@@ -300,6 +319,19 @@ function Scanner({ notify }) {
     setStatus('empty');
   }
 
+  async function copyCode() {
+    if (!code.trim()) {
+      notify('Nothing to copy — the editor is empty.', 'warn');
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(code);
+      notify('Code copied to clipboard!', 'success');
+    } catch {
+      notify('Could not access clipboard.', 'error');
+    }
+  }
+
   async function loadFile(file) {
     if (!file) return;
     const validExtensions = ['.py', '.pyw', '.pyi', '.txt'];
@@ -419,6 +451,9 @@ function Scanner({ notify }) {
               <button className="btn-icon" type="button" onClick={() => { setCode(DEMO_CODE); setFilename('vulnerable.py'); clearResults(); }}>
                 <Icon name="file" />Demo
               </button>
+              <button className="btn-icon" type="button" onClick={() => void copyCode()} title="Copy code to clipboard">
+                <Icon name="copy" />Copy
+              </button>
               <button className="btn-icon" type="button" onClick={() => { setCode(''); setFilename('untitled.py'); clearResults(); }}>
                 <Icon name="trash" />Clear
               </button>
@@ -488,6 +523,9 @@ function Scanner({ notify }) {
             <button className="btn-primary scan-btn" type="button" onClick={() => void runScan()} disabled={isScanning}>
               <Icon name="search" />{isScanning ? 'Scanning...' : 'Scan Code'}
             </button>
+            {code.length > 0 && (
+              <span className="code-stats">{lines.length} lines · {code.length} chars</span>
+            )}
           </div>
         </div>
 
@@ -753,8 +791,9 @@ function App() {
   const page = pageOptions.includes(requestedPage) ? requestedPage : 'scanner';
   const [toast, setToast] = useState(null);
   const toastTimer = useRef(null);
+  const [dark, setDark] = useDarkMode();
 
-  React.useEffect(() => {
+  useEffect(() => {
     document.documentElement.dataset.page = page;
     return () => clearTimeout(toastTimer.current);
   }, [page]);
@@ -767,7 +806,7 @@ function App() {
 
   return (
     <>
-      <Navbar page={page} />
+      <Navbar page={page} dark={dark} onToggleDark={() => setDark(prev => !prev)} />
       {page === 'scanner' && <Hero />}
       <main className="main-content">
         {page === 'scanner' && <Scanner notify={notify} />}

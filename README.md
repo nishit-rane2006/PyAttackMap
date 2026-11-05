@@ -5,6 +5,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Tests: 24 Passed](https://img.shields.io/badge/tests-24%20passed-brightgreen.svg)]()
 [![Speedup: 42x](https://img.shields.io/badge/speedup-42.4x-brightgreen.svg)]()
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-black.svg?logo=vercel)](https://py-attack-map.vercel.app/)
+
+> 🌐 **[Try the live web frontend → py-attack-map.vercel.app](https://py-attack-map.vercel.app/)**
 
 **PyAttackMap** is an explainable static security analysis and data-flow visualization library for Python source code, implemented in high-performance native **C++20** with the Tree-sitter C parser runtime.
 
@@ -128,7 +131,7 @@ int main() {
 
 ## Web Frontend Dashboard
 
-An interactive React browser frontend for PyAttackMap is available in the `frontend/` directory.
+An interactive React browser frontend for PyAttackMap is available in the `frontend/` directory and **[deployed live on Vercel](https://py-attack-map.vercel.app/)**.
 
 ### Features
 - **Code Scanner**: Paste Python source or upload a `.py` file and run simulated taint analysis

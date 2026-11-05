@@ -15,6 +15,50 @@
   --font-code: Consolas, "Courier New", monospace;
 }
 
+/* ── Dark mode overrides ─────────────────────────────────────────── */
+html.dark {
+  --page: #0f1923;
+  --surface: #1a2535;
+  --surface-muted: #1e2d40;
+  --border: #2a3a50;
+  --text: #e2eaf3;
+  --text-muted: #8ca3bd;
+  --accent: #2bbdae;
+  --accent-hover: #1fa99b;
+  --danger: #f97066;
+  --warning: #f9a825;
+  --success: #34d399;
+  --code-bg: #151f2d;
+}
+
+html.dark body {
+  background:
+    radial-gradient(ellipse at 10% 0%, #0d2030 0, transparent 34rem),
+    var(--page);
+}
+
+html.dark .navbar {
+  background: rgb(15 25 35 / 92%);
+}
+
+html.dark .hero {
+  background:
+    radial-gradient(ellipse at 82% 18%, rgb(43 189 174 / 20%), transparent 27rem),
+    radial-gradient(ellipse at 12% 100%, rgb(16 50 90 / 40%), transparent 30rem),
+    linear-gradient(125deg, #080f18, #0d1e2e 58%, #0a2928);
+}
+
+html.dark .footer {
+  background: #0d1621;
+}
+
+html.dark pre,
+html.dark .guide-code,
+html.dark .mermaid-pre {
+  background: var(--code-bg);
+  color: var(--text);
+}
+
 *,
 *::before,
 *::after {
@@ -1600,4 +1644,33 @@ body {
   html {
     scroll-behavior: auto;
   }
+}
+
+/* ── Dark mode toggle button ─────────────────────────────────────── */
+.dark-toggle {
+  font-size: 1rem;
+  min-width: 36px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  line-height: 1;
+}
+
+/* ── Code stats badge (lines · chars) ───────────────────────────── */
+.code-stats {
+  align-self: center;
+  margin-left: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ── Icon: copy SVG paths ────────────────────────────────────────── */
+.icon-copy rect,
+.icon-copy path {
+  stroke: currentColor;
 }
