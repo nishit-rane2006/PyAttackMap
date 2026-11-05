@@ -749,10 +749,108 @@ textarea:focus-visible,
   margin-top: 0;
 }
 
+.dataflow-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.view-toggle-group {
+  display: inline-flex;
+  padding: 2px;
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+}
+
+.view-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 140ms ease;
+}
+
+.view-toggle-btn:hover {
+  color: var(--text);
+}
+
+.view-toggle-btn.active {
+  background: #ffffff;
+  color: var(--accent);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 7%);
+}
+
 .dataflow-content {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(220px, 300px);
   min-height: 230px;
+}
+
+.dataflow-content.dataflow-content-tabs {
+  display: flex;
+  flex-direction: column;
+  min-height: 240px;
+}
+
+.mermaid-canvas-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 240px;
+  padding: 24px;
+  overflow-x: auto;
+  background: #0f1926;
+  border-radius: 0 0 12px 12px;
+}
+
+.mermaid-svg-mount {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.mermaid-svg-mount svg {
+  max-width: 100%;
+  height: auto;
+  filter: drop-shadow(0 2px 8px rgb(0 0 0 / 25%));
+}
+
+.mermaid-loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 220px;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.mermaid-fallback-box {
+  padding: 16px;
+  background: var(--code-bg);
+}
+
+.mermaid-fallback-note {
+  margin: 0 0 8px;
+  color: var(--warning);
+  font-size: 0.78rem;
+}
+
+.mermaid-code-box.full-width {
+  border-left: 0;
+  padding: 18px;
+  width: 100%;
 }
 
 .flow-graph {

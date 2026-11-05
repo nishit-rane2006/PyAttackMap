@@ -1,7 +1,32 @@
 import React, { useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import mermaid from 'mermaid';
 import { DEMO_CODE, RULES, RULE_GUIDE, TaintAnalyzer, toMermaid } from '../scanner.js';
 import '../style.css';
+
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'dark',
+  themeVariables: {
+    darkMode: true,
+    fontFamily: 'Consolas, "Courier New", monospace',
+    fontSize: '12px',
+    background: '#0f1926',
+    primaryColor: '#1a4a5a',
+    primaryBorderColor: '#26c6da',
+    primaryTextColor: '#e2e8f0',
+    lineColor: '#60a5fa',
+    secondaryColor: '#4a3800',
+    tertiaryColor: '#4a1520',
+  },
+  securityLevel: 'loose',
+  flowchart: {
+    htmlLabels: true,
+    curve: 'basis',
+    useMaxWidth: true,
+    padding: 16,
+  },
+});
 
 const pageOptions = ['scanner', 'rules', 'guide', 'about'];
 const pageLabels = { guide: 'Getting Started' };
@@ -20,6 +45,8 @@ function Icon({ name }) {
     trash: <><polyline points="3,6 5,6 21,6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" /></>,
     search: <><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></>,
     upload: <><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></>,
+    diagram: <><rect x="3" y="3" width="6" height="6" rx="1" /><rect x="15" y="3" width="6" height="6" rx="1" /><rect x="9" y="15" width="6" height="6" rx="1" /><path d="M6 9v3a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9" /><line x1="12" y1="14" x2="12" y2="15" /></>,
+    code: <><polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" /></>,
   };
   return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">{paths[name]}</svg>;
 }
@@ -103,37 +130,136 @@ function FindingCard({ finding, index, selected, onSelect }) {
   );
 }
 
+function MermaidViewer({ chart }) {
+  const [svgHtml, setSvgHtml] = useState('');
+  const [renderError, setRenderError] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    let isMounted = true;
+    setLoading(true);
+    setRenderError(null);
+
+    const renderDiagram = async () => {
+      try {
+        const id = `mermaid-chart-${Math.random().toString(36).substring(2, 9)}`;
+        const { svg } = await mermaid.render(id, chart);
+        if (isMounted) {
+          setSvgHtml(svg);
+          setLoading(false);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setRenderError(err?.message || 'Failed to render flowchart');
+          setLoading(false);
+        }
+      }
+    };
+
+    void renderDiagram();
+    return () => {
+      isMounted = false;
+    };
+  }, [chart]);
+
+  if (renderError) {
+    return (
+      <div className="mermaid-fallback-box">
+        <p className="mermaid-fallback-note">Could not render graphical preview. Showing syntax:</p>
+        <pre className="mermaid-pre">{chart}</pre>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="mermaid-loading-state">
+        <span className="status-dot pulse" />
+        <span>Rendering visual flowchart...</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mermaid-canvas-wrap">
+      <div className="mermaid-svg-mount" dangerouslySetInnerHTML={{ __html: svgHtml }} />
+    </div>
+  );
+}
+
 function DataflowPanel({ findings, selectedIndex, onSelect, onCopy, panelRef }) {
   const finding = findings[selectedIndex];
   if (!finding?.dataflow) return null;
+  const [viewMode, setViewMode] = useState('diagram');
+  const chartCode = toMermaid(finding.dataflow);
+
   return (
     <div className="panel dataflow-panel" id="dataflow-panel" ref={panelRef}>
       <div className="panel-header">
-        <span className="panel-title">Data-Flow Graph</span>
-        <div className="panel-actions">
+        <div className="dataflow-header-left">
+          <span className="panel-title">Data-Flow Graph</span>
           <select className="config-select sm" aria-label="Select finding" value={selectedIndex} onChange={event => onSelect(Number(event.target.value))}>
             {findings.map((item, index) => <option key={item.id} value={index}>{item.id}: {item.rule_id} – {item.title} (L{item.line})</option>)}
           </select>
-          <button className="btn-icon" type="button" onClick={onCopy}>Copy Mermaid</button>
+        </div>
+        <div className="panel-actions">
+          <div className="view-toggle-group" role="tablist" aria-label="Flowchart view">
+            <button
+              className={`view-toggle-btn${viewMode === 'diagram' ? ' active' : ''}`}
+              type="button"
+              role="tab"
+              aria-selected={viewMode === 'diagram'}
+              onClick={() => setViewMode('diagram')}
+            >
+              <Icon name="diagram" /> Diagram
+            </button>
+            <button
+              className={`view-toggle-btn${viewMode === 'sequence' ? ' active' : ''}`}
+              type="button"
+              role="tab"
+              aria-selected={viewMode === 'sequence'}
+              onClick={() => setViewMode('sequence')}
+            >
+              Sequence
+            </button>
+            <button
+              className={`view-toggle-btn${viewMode === 'code' ? ' active' : ''}`}
+              type="button"
+              role="tab"
+              aria-selected={viewMode === 'code'}
+              onClick={() => setViewMode('code')}
+            >
+              <Icon name="code" /> Mermaid Syntax
+            </button>
+          </div>
+          <button className="btn-icon" type="button" onClick={onCopy} title="Copy Mermaid syntax">Copy</button>
         </div>
       </div>
-      <div className="dataflow-content">
-        <div className="flow-graph">
-          <div className="flow-nodes">
-            {finding.dataflow.nodes.map((node, index) => (
-              <React.Fragment key={`${node.kind}-${index}`}>
-                <div className="flow-node">
-                  <div className={`node-box ${node.kind === 'SOURCE' ? 'node-source' : node.kind === 'PROPAGATE' ? 'node-propagate' : 'node-sink'}`} title={node.content}>
-                    {node.label}<br /><small>L{node.line}</small>
+      <div className="dataflow-content dataflow-content-tabs">
+        {viewMode === 'diagram' && <MermaidViewer chart={chartCode} />}
+        {viewMode === 'sequence' && (
+          <div className="flow-graph">
+            <div className="flow-nodes">
+              {finding.dataflow.nodes.map((node, index) => (
+                <React.Fragment key={`${node.kind}-${index}`}>
+                  <div className="flow-node">
+                    <div className={`node-box ${node.kind === 'SOURCE' ? 'node-source' : node.kind === 'PROPAGATE' ? 'node-propagate' : 'node-sink'}`} title={node.content}>
+                      {node.label}<br /><small>L{node.line}</small>
+                    </div>
+                    <div className="node-label">{node.kind}</div>
                   </div>
-                  <div className="node-label">{node.kind}</div>
-                </div>
-                {index < finding.dataflow.nodes.length - 1 && <div className="flow-arrow" aria-hidden="true">→</div>}
-              </React.Fragment>
-            ))}
+                  {index < finding.dataflow.nodes.length - 1 && <div className="flow-arrow" aria-hidden="true">→</div>}
+                </React.Fragment>
+              ))}
+            </div>
           </div>
-        </div>
-        <div className="mermaid-code-box"><div className="mermaid-label">Mermaid Syntax</div><pre className="mermaid-pre">{toMermaid(finding.dataflow)}</pre></div>
+        )}
+        {viewMode === 'code' && (
+          <div className="mermaid-code-box full-width">
+            <div className="mermaid-label">Mermaid Flowchart Syntax</div>
+            <pre className="mermaid-pre">{chartCode}</pre>
+          </div>
+        )}
       </div>
     </div>
   );
